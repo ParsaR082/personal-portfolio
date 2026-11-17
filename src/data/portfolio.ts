@@ -2,13 +2,13 @@ export const profile = {
   name: "Parsa Rahmani",
   role: "Full-stack developer & digital creator",
   location: "Available worldwide",
-  email: "hello@urumsima.ir",
+  email: "YOUR_EMAIL@example.com",
   intro: "I design and build thoughtful digital experiences.",
   description: "I’m a developer focused on turning ambitious ideas into fast, accessible and memorable websites — from the first sketch to a production-ready product.",
   availability: "Available for select projects",
   socials: [
     { label: "GitHub", href: "https://github.com/ParsaR082" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/YOUR_PROFILE/" },
     { label: "Email", href: "mailto:hello@urumsima.ir" }
   ]
 };
