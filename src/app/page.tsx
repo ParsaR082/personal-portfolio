@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowDown, ArrowDownRight, ArrowUpRight, Asterisk, Check, Code2, Dribbble, Github, Globe2, Linkedin, Mail, Menu, MoveUpRight, Sparkles, X } from "lucide-react";
+import { motion, type Variants } from "framer-motion";
+import { ArrowDown, ArrowDownRight, ArrowUpRight, Asterisk, Check, Globe2, Mail, Menu, Sparkles, X } from "lucide-react";
 import { expertise, process, profile, projects, services } from "@/data/portfolio";
 
-const reveal = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: .65, ease: "easeOut" } } };
+const reveal: Variants = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: "easeOut" } } };
 
 export default function Home() {
   const [filter, setFilter] = useState("All");
