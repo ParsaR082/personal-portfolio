@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowDown, ArrowDownRight, ArrowUpRight, Asterisk, Check, Code2, Dribbble, Github, Globe2, Linkedin, Mail, Menu, MoveUpRight, Sparkles, X } from "lucide-react";
 import { expertise, process, profile, projects, services } from "@/data/portfolio";
 
-const reveal = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: .65, ease: [0.22, 1, 0.36, 1] } } };
+const reveal = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: .65, ease: "easeOut" } } };
 
 export default function Home() {
   const [filter, setFilter] = useState("All");
