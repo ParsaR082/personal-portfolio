@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import HtmlRenderer from "@/components/HtmlRenderer";
 import projectsData from "@/data/projects.json";
 
 interface PageProps {
@@ -33,11 +32,10 @@ export default async function ProjectPage({ params }: PageProps) {
   }
 
   return (
-    <HtmlRenderer
-      className={project.bodyClass}
-      styles={project.headStyles}
-      html={project.bodyContent}
+    <div
+      style={{ display: "contents" }}
+      dangerouslySetInnerHTML={{ __html: project.bodyContent }}
+      suppressHydrationWarning
     />
   );
 }
-

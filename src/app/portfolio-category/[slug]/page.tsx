@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import HtmlRenderer from "@/components/HtmlRenderer";
 import categoriesData from "@/data/categories.json";
 
 interface PageProps {
@@ -33,11 +32,10 @@ export default async function CategoryPage({ params }: PageProps) {
   }
 
   return (
-    <HtmlRenderer
-      className={category.bodyClass}
-      styles={category.headStyles}
-      html={category.bodyContent}
+    <div
+      style={{ display: "contents" }}
+      dangerouslySetInnerHTML={{ __html: category.bodyContent }}
+      suppressHydrationWarning
     />
   );
 }
-

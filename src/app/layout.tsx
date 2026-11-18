@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Tamal Sen - Software Engineer, Front-end & App Developer",
   description:
-    "Tamal Sen is a software engineer, front-end and app developer with a passion for building beautiful, responsive, and user-friendly digital experiences.",
+    "Developer devoted to creating great web experiences focused on React, NextJS and Flutter based in Bangladesh, meet Tamal Sen",
   icons: {
     icon: [
       { url: "/wp-content/uploads/2021/11/cropped-favicon-32x32.png", sizes: "32x32" },
@@ -23,9 +23,11 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Google Fonts & Icons */}
+
+        {/* Google Fonts */}
         <link rel="stylesheet" href="/assets/fonts/google-fonts.css" />
         <link rel="stylesheet" href="/assets/vendor/npm/aos@2.3.4/dist/aos.min.css" />
+
         {/* Core Theme and Plugin Stylesheets */}
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_a2b5b0bceca20a9b48507ecc5327809f.css" />
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_e2468ba530df7b96269ff011844df98c.css" />
@@ -35,9 +37,18 @@ export default function RootLayout({
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_a46a0fceb4cca53c4753c5bf6e776cf6.css" />
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_ec851c1af7799610f9364808b29ee246.css" />
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_3533e8abfae64b2e36fbad13be227fb6.css" />
+
+        {/* Custom Head Styles (10 inline style blocks combined) */}
+        <link rel="stylesheet" href="/assets/css/custom-head-styles.css" />
+
+        {/* Core Head Scripts */}
+        <script src="/wp-includes/js/jquery/jquery.min.js"></script>
+        <script src="/wp-includes/js/jquery/jquery-migrate.min.js"></script>
+        <script src="/wp-content/plugins/happy-elementor-addons/assets/vendor/dom-purify/purify.min.js"></script>
+        <script src="/assets/vendor/npm/aos@2.3.4/dist/aos.min.js"></script>
       </head>
       <body
-        style={{ backgroundColor: "#111", color: "#fff", margin: 0, padding: 0 }}
+        className="home wp-singular page-template page-template-elementor_header_footer page page-id-21460 wp-embed-responsive wp-theme-ohio wp-child-theme-ohio-child ohio-theme-2-0-0 with-header-3 dark-scheme custom-cursor elementor-default elementor-template-full-width elementor-kit-17 elementor-page elementor-page-21460"
         suppressHydrationWarning
       >
         {children}
@@ -45,4 +56,3 @@ export default function RootLayout({
     </html>
   );
 }
-
