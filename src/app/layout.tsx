@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tamal Sen - Software Engineer, Front-end & App Developer",
+  title: "تامال سن - مهندس نرم‌افزار، توسعه‌دهنده فرانت‌اند و اپلیکیشن",
   description:
-    "Developer devoted to creating great web experiences focused on React, NextJS and Flutter based in Bangladesh, meet Tamal Sen",
+    "مهندس نرم‌افزار متعهد به خلق تجربه‌های وب و موبایل با تمرکز بر React، Next.js و Flutter. تامال سن",
   icons: {
     icon: [
       { url: "/wp-content/uploads/2021/11/cropped-favicon-32x32.png", sizes: "32x32" },
@@ -19,13 +19,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-US" suppressHydrationWarning>
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {/* Google Fonts */}
         <link rel="stylesheet" href="/assets/fonts/google-fonts.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" />
         <link rel="stylesheet" href="/assets/vendor/npm/aos@2.3.4/dist/aos.min.css" />
 
         {/* Core Theme and Plugin Stylesheets */}
@@ -66,7 +67,8 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="home wp-singular page-template page-template-elementor_header_footer page page-id-21460 wp-embed-responsive wp-theme-ohio wp-child-theme-ohio-child ohio-theme-2-0-0 with-header-3 dark-scheme custom-cursor elementor-default elementor-template-full-width elementor-kit-17 elementor-page elementor-page-21460"
+        className="home wp-singular page-template page-template-elementor_header_footer page page-id-21460 wp-embed-responsive wp-theme-ohio wp-child-theme-ohio-child ohio-theme-2-0-0 with-header-3 rtl dark-scheme custom-cursor elementor-default elementor-template-full-width elementor-kit-17 elementor-page elementor-page-21460"
+        dir="rtl"
         suppressHydrationWarning
       >
         {children}

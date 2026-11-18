@@ -370,3 +370,192 @@ max-width: 1120px;
     height: 100%;
     max-height: 40px;
 }
+
+/* =========================================================
+   RTL PERSIAN (فارسی) ENHANCEMENTS
+   ========================================================= */
+
+/* 1. Global Font and Typography */
+html[dir="rtl"],
+body.rtl,
+body.rtl button,
+body.rtl input,
+body.rtl select,
+body.rtl textarea,
+body.rtl h1,
+body.rtl h2,
+body.rtl h3,
+body.rtl h4,
+body.rtl h5,
+body.rtl h6,
+body.rtl p,
+body.rtl a,
+body.rtl span,
+body.rtl div {
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body.rtl code,
+body.rtl pre,
+body.rtl #primary-menu,
+body.rtl #primary-menu span,
+body.rtl #mobile-menu span {
+  font-family: 'Vazirmatn', 'Roboto mono', monospace !important;
+  letter-spacing: 0px !important;
+}
+
+/* 2. Top Header and Navbar RTL Alignment */
+/* Far right: خانه | Far left: ارتباط با ما */
+body.rtl .header-wrap-inner {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+body.rtl .header-wrap-inner .left-part {
+  order: 2 !important; /* Logo on the left */
+  display: flex !important;
+  align-items: center !important;
+}
+
+body.rtl .header-wrap-inner .right-part {
+  order: 1 !important; /* Menu on the right */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+body.rtl #primary-menu {
+  display: flex !important;
+  flex-direction: row !important;
+  direction: rtl !important;
+  text-align: right !important;
+  gap: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+}
+
+body.rtl #primary-menu > li {
+  float: none !important;
+  display: inline-flex !important;
+  margin: 0 !important;
+}
+
+body.rtl #primary-menu > li:first-child {
+  margin-right: 0 !important;
+}
+
+body.rtl #mobile-menu {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+body.rtl #mobile-menu li {
+  text-align: right !important;
+}
+
+/* 3. Underline Gradients in RTL */
+body.rtl .chonky-underline-megenta::after {
+  background: linear-gradient(295deg, #DF058D 0%, #DF058D 100%, rgba(255, 209, 0, 0) 100%) !important;
+  right: -1% !important;
+  left: auto !important;
+}
+body.rtl .chonky-underline-blue::after {
+  background: linear-gradient(295deg, #2C49D8 0%, #2C49D8 100%, rgba(255, 209, 0, 0) 100%) !important;
+  right: -1% !important;
+  left: auto !important;
+}
+body.rtl .chonky-underline-yellow::after {
+  background: linear-gradient(295deg, #FF6B2B 0%, #FF6B2B 100%, rgba(255, 209, 0, 0) 100%) !important;
+  right: -1% !important;
+  left: auto !important;
+}
+body.rtl .chonky-underline-violet::after {
+  background: linear-gradient(295deg, #9440e8 0%, #9440e8 100%, rgba(255, 209, 0, 0) 100%) !important;
+  right: -1% !important;
+  left: auto !important;
+}
+body.rtl .chonky-underline-violet.has-hover-anim:hover::after {
+  background: linear-gradient(295deg, #9440e8 0%, #9440e8 100%, rgba(255, 209, 0, 0) 100%) !important;
+  right: -1% !important;
+  left: auto !important;
+}
+
+/* 4. Code-editor style cards in RTL */
+body.rtl .code-editor-style .elementor-widget-container:after {
+  left: auto !important;
+  right: 17px !important;
+}
+body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title {
+  padding-left: 0 !important;
+  padding-right: 35px !important;
+  text-align: right !important;
+}
+body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::before,
+body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::after {
+  margin-left: 0 !important;
+  margin-right: -35px !important;
+  text-align: right !important;
+}
+
+/* 5. Quote icon and Testimonials in RTL */
+body.rtl .has-quote-image:before {
+  left: auto !important;
+  right: 0 !important;
+  transform: scaleX(-1) !important;
+}
+body.rtl .testimonial-quote,
+body.rtl .elementor-widget-heading .elementor-heading-title {
+  text-align: right;
+}
+
+/* 6. Experience Accordions in RTL */
+body.rtl .accordionItem_title {
+  text-align: right !important;
+  direction: rtl !important;
+}
+body.rtl .accordionItem_title h6 {
+  width: 95% !important;
+}
+body.rtl .accordionItem_title h6 > div {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  direction: rtl !important;
+}
+body.rtl .accordionItem_content {
+  text-align: right !important;
+  direction: rtl !important;
+}
+body.rtl .accordionItem_control {
+  left: 0 !important;
+  right: auto !important;
+}
+
+/* 7. Scroll-to-top Button in RTL */
+body.rtl .ha-scroll-to-top-button {
+  left: 15px !important;
+  right: auto !important;
+}
+
+/* 8. Portfolio sorting filters in RTL */
+body.rtl .portfolio-sorting {
+  direction: rtl !important;
+  text-align: right !important;
+}
+body.rtl .portfolio-sorting li {
+  margin-left: 15px !important;
+  margin-right: 0 !important;
+}
+
+/* 9. Ensure phone mockup 3D element and video are positioned properly */
+body.rtl .elementor-element-8dfc42c {
+  z-index: 2 !important;
+}
+body.rtl .elementor-element-8dfc42c video {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}

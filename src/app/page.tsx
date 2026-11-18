@@ -4,7 +4,7 @@ import homeData from "@/data/home.json";
 export const metadata: Metadata = {
   title: homeData.title,
   description:
-    "Developer devoted to creating great web experiences focused on React, NextJS and Flutter based in Bangladesh, meet Tamal Sen",
+    "مهندس نرم‌افزار متعهد به ساخت بهترین تجربه‌های وب و اپلیکیشن با تمرکز بر React، Next.js و Flutter. تامال سن",
 };
 
 export default function HomePage() {
