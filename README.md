@@ -1,12 +1,22 @@
-# Personal Portfolio
+# Personal Portfolio - Tamal Sen (Clone)
 
-A custom, responsive developer portfolio inspired by modern editorial portfolio layouts. Built with Next.js, TypeScript, Tailwind CSS, and Framer Motion.
+Exact replica of [tamalsen.dev](https://tamalsen.dev/) personal portfolio website.
 
-## Development
+## Features
+- Fully responsive layout
+- All original animations (AOS, Isotope, smooth scroll, hover effects)
+- All high-resolution images, SVGs, and graphics preserved locally
+- Self-contained web fonts and icons
+- All project and category pages included
+- 100% offline-ready static website
+
+## Live Preview
+To view the site locally, you can open `index.html` in any modern web browser or serve it with any static web server:
 
 ```bash
-npm install
-npm run dev
-```
+# Python
+python -m http.server 3000
 
-Replace the project links, contact details, and profile copy in `src/data/portfolio.ts` with verified information before launch.
+# or npx
+npx serve .
+```
