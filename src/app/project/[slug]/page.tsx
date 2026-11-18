@@ -32,10 +32,16 @@ export default async function ProjectPage({ params }: PageProps) {
   }
 
   return (
-    <div
-      style={{ display: "contents" }}
-      dangerouslySetInnerHTML={{ __html: project.bodyContent }}
-      suppressHydrationWarning
-    />
+    <>
+      <link
+        rel="stylesheet"
+        href="/wp-content/cache/autoptimize/css/autoptimize_3533e8abfae64b2e36fbad13be227fb6.css"
+      />
+      <div
+        style={{ display: "contents" }}
+        dangerouslySetInnerHTML={{ __html: project.bodyContent }}
+        suppressHydrationWarning
+      />
+    </>
   );
 }

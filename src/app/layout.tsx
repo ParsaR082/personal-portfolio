@@ -36,7 +36,6 @@ export default function RootLayout({
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_09ba3a95be4621714e3408982b13f140.css" />
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_a46a0fceb4cca53c4753c5bf6e776cf6.css" />
         <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_single_ec851c1af7799610f9364808b29ee246.css" />
-        <link rel="stylesheet" href="/wp-content/cache/autoptimize/css/autoptimize_3533e8abfae64b2e36fbad13be227fb6.css" />
 
         {/* Custom Head Styles (10 inline style blocks combined) */}
         <link rel="stylesheet" href="/assets/css/custom-head-styles.css" />
