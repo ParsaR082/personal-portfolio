@@ -24,9 +24,9 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        {/* Google Fonts */}
+        {/* Fonts */}
+        <link rel="stylesheet" href="/assets/fonts/estedad/index.css" />
         <link rel="stylesheet" href="/assets/fonts/google-fonts.css" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" />
         <link rel="stylesheet" href="/assets/vendor/npm/aos@2.3.4/dist/aos.min.css" />
 
         {/* Core Theme and Plugin Stylesheets */}
@@ -46,6 +46,7 @@ export default function RootLayout({
         <script src="/wp-includes/js/jquery/jquery-migrate.min.js"></script>
         <script src="/wp-content/plugins/happy-elementor-addons/assets/vendor/dom-purify/purify.min.js"></script>
         <script src="/assets/vendor/npm/aos@2.3.4/dist/aos.min.js"></script>
+        <script src="/wp-content/plugins/elementor-pro/assets/lib/lottie/lottie.min.js"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -61,6 +62,21 @@ export default function RootLayout({
                     p.catch(function() {});
                   }
                 });
+
+                function loadScrollLottie() {
+                  var container = document.querySelector(".e-lottie__animation");
+                  if (container && window.lottie && !container.hasChildNodes()) {
+                    window.lottie.loadAnimation({
+                      container: container,
+                      renderer: "svg",
+                      loop: true,
+                      autoplay: true,
+                      path: "/wp-content/uploads/2021/07/lf30_editor_axlyflyi.json"
+                    });
+                  }
+                }
+                loadScrollLottie();
+                setTimeout(loadScrollLottie, 500);
               });
             `,
           }}

@@ -372,10 +372,12 @@ max-width: 1120px;
 }
 
 /* =========================================================
-   RTL PERSIAN (فارسی) ENHANCEMENTS
+   RTL PERSIAN (فارسی) ENHANCEMENTS & BUG FIXES
    ========================================================= */
 
-/* 1. Global Font and Typography */
+/* 1. Global Font and Typography - Estedad Variable */
+@import url('/assets/fonts/estedad/index.css');
+
 html[dir="rtl"],
 body.rtl,
 body.rtl button,
@@ -392,15 +394,16 @@ body.rtl p,
 body.rtl a,
 body.rtl span,
 body.rtl div {
-  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Estedad Variable', 'Estedad', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 body.rtl code,
 body.rtl pre,
+body.rtl .font-mono,
 body.rtl #primary-menu,
 body.rtl #primary-menu span,
 body.rtl #mobile-menu span {
-  font-family: 'Vazirmatn', 'Roboto mono', monospace !important;
+  font-family: 'Estedad Variable', 'Estedad', 'Roboto mono', monospace !important;
   letter-spacing: 0px !important;
 }
 
@@ -456,7 +459,86 @@ body.rtl #mobile-menu li {
   text-align: right !important;
 }
 
-/* 3. Underline Gradients in RTL */
+/* =========================================================
+   PROBLEM 1 FIX: Hero Section Centering
+   ========================================================= */
+#hero-section .elementor-element-81270ae,
+#hero-section .elementor-element-81270ae .elementor-heading-title,
+#hero-section #as-featured-in-section,
+#hero-section #as-featured-in-text,
+#hero-section #as-featured-in-text .elementor-heading-title,
+#hero-section .elementor-element-9037bc9,
+#hero-section .elementor-element-9037bc9 .elementor-heading-title {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+#hero-section #as-featured-in-section > .elementor-container {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+}
+
+/* =========================================================
+   PROBLEM 2 FIX: Scroll Down Indicator (Looping Lottie Pill)
+   ========================================================= */
+.elementor-element.elementor-element-82668a7 {
+  position: absolute !important;
+  bottom: 25px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  z-index: 10 !important;
+  width: 35px !important;
+  margin: 0 auto !important;
+  display: block !important;
+  text-align: center !important;
+}
+
+.elementor-element.elementor-element-82668a7 .e-lottie__container {
+  width: 35px !important;
+  height: 60px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.elementor-element.elementor-element-82668a7 .e-lottie__animation {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* =========================================================
+   PROBLEM 3 FIX: "تخصص‌های من" Centering & Card Typography
+   ========================================================= */
+.elementor-element.elementor-element-ef9a041,
+.elementor-element.elementor-element-ef9a041 .elementor-heading-title {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+}
+
+/* Icon box on the right side in RTL */
+body.rtl .icon-box.with-left-icon:not(.with-full-icon) {
+  padding-left: 0 !important;
+  padding-right: 65px !important;
+  text-align: right !important;
+}
+
+body.rtl .icon-box.with-left-icon:not(.with-full-icon) .icon-box-icon {
+  left: auto !important;
+  right: 0 !important;
+}
+
+body.rtl .icon-box-title {
+  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Underline Gradients in RTL */
 body.rtl .chonky-underline-megenta::after {
   background: linear-gradient(295deg, #DF058D 0%, #DF058D 100%, rgba(255, 209, 0, 0) 100%) !important;
   right: -1% !important;
@@ -483,35 +565,144 @@ body.rtl .chonky-underline-violet.has-hover-anim:hover::after {
   left: auto !important;
 }
 
-/* 4. Code-editor style cards in RTL */
+/* Code-editor style cards in RTL */
+body.rtl .code-editor-style .elementor-widget-container {
+  position: relative;
+}
+
 body.rtl .code-editor-style .elementor-widget-container:after {
+  opacity: 0.35;
+  content: '';
+  width: 0;
+  height: 70%;
+  position: absolute;
+  background-color: #66d9ed;
+  border-right: 2px solid #66d9ed;
+  bottom: 15%;
+  right: 12px !important;
   left: auto !important;
-  right: 17px !important;
 }
+
 body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title {
-  padding-left: 0 !important;
-  padding-right: 35px !important;
+  padding-right: 28px !important;
+  padding-left: 10px !important;
   text-align: right !important;
+  font-size: 13.5px !important;
+  line-height: 1.85 !important;
+  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  color: #cfd3dc !important;
+  direction: rtl !important;
 }
+
 body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::before,
 body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::after {
+  opacity: 0.45;
+  color: #66d9ed;
+  display: block;
+  font-family: 'Roboto Mono', monospace !important;
+  font-weight: 500;
+  font-size: 13px;
+  direction: ltr !important;
+  text-align: right !important;
+  margin-right: -28px !important;
   margin-left: 0 !important;
-  margin-right: -35px !important;
+}
+
+body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::before {
+  content: "<h3>";
+  margin-bottom: 6px;
+}
+
+body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title::after {
+  content: "</h3>";
+  margin-top: 6px;
+}
+
+/* =========================================================
+   PROBLEM 4 FIX: Work Section Tryotel Featured Project Layout
+   ========================================================= */
+body.rtl .elementor-element-a1b9b56 {
+  position: relative !important;
+}
+
+/* Flip purple arrow horizontally to point to the phone on the left */
+body.rtl .elementor-element-d654387 {
+  text-align: right !important;
+  transform: scaleX(-1) !important;
+  margin-right: 60px !important;
+  margin-left: 0 !important;
+}
+
+body.rtl .elementor-element-d38e305,
+body.rtl .elementor-element-d38e305 .elementor-heading-title {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+body.rtl .elementor-element-5df8de9,
+body.rtl .elementor-element-5df8de9 .elementor-heading-title {
+  text-align: right !important;
+  direction: rtl !important;
+  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+}
+
+body.rtl .elementor-element-93f6e71 {
   text-align: right !important;
 }
 
-/* 5. Quote icon and Testimonials in RTL */
-body.rtl .has-quote-image:before {
-  left: auto !important;
-  right: 0 !important;
-  transform: scaleX(-1) !important;
-}
-body.rtl .testimonial-quote,
-body.rtl .elementor-widget-heading .elementor-heading-title {
-  text-align: right;
+body.rtl .elementor-element-93f6e71 .elementor-button-wrapper {
+  text-align: right !important;
 }
 
-/* 6. Experience Accordions in RTL */
+/* Position phone mockup cleanly on the left */
+body.rtl .elementor-element-8dfc42c {
+  right: auto !important;
+  left: -40px !important;
+  top: -62px !important;
+}
+
+body.rtl .elementor-element-8dfc42c video {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+body.rtl .elementor-element-249bd7b {
+  text-align: right !important;
+}
+
+body.rtl .elementor-element-1e46132 .elementor-heading-title {
+  text-align: right !important;
+}
+
+body.rtl .elementor-element-92ca4d8 .elementor-heading-title {
+  text-align: right !important;
+}
+
+/* =========================================================
+   PROBLEM 5 FIX: Testimonial Quotes & Double Quotation Badge
+   ========================================================= */
+/* The quote icon is positioned on top-left of card, while portrait is on right */
+body.rtl .has-quote-image:before {
+  left: 0 !important;
+  right: auto !important;
+  top: 0 !important;
+  transform: none !important;
+}
+
+body.rtl .testimonial-quote,
+body.rtl .elementor-widget-text-editor p {
+  text-align: right !important;
+  direction: rtl !important;
+  line-height: 1.8 !important;
+}
+
+body.rtl .testimonial-author {
+  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Experience Accordions in RTL */
 body.rtl .accordionItem_title {
   text-align: right !important;
   direction: rtl !important;
@@ -534,13 +725,13 @@ body.rtl .accordionItem_control {
   right: auto !important;
 }
 
-/* 7. Scroll-to-top Button in RTL */
+/* Scroll-to-top Button in RTL */
 body.rtl .ha-scroll-to-top-button {
   left: 15px !important;
   right: auto !important;
 }
 
-/* 8. Portfolio sorting filters in RTL */
+/* Portfolio sorting filters in RTL */
 body.rtl .portfolio-sorting {
   direction: rtl !important;
   text-align: right !important;
@@ -548,14 +739,4 @@ body.rtl .portfolio-sorting {
 body.rtl .portfolio-sorting li {
   margin-left: 15px !important;
   margin-right: 0 !important;
-}
-
-/* 9. Ensure phone mockup 3D element and video are positioned properly */
-body.rtl .elementor-element-8dfc42c {
-  z-index: 2 !important;
-}
-body.rtl .elementor-element-8dfc42c video {
-  max-width: 100% !important;
-  height: auto !important;
-  object-fit: contain !important;
 }
