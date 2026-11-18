@@ -15,6 +15,16 @@ html, body {
   min-width: 100% !important;
 }
 
+/* Tryotel Phone Mockup Video Styling */
+.elementor-element-8dfc42c {
+  z-index: 2 !important;
+}
+.elementor-element-8dfc42c video {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
 img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 /*# sourceURL=wp-img-auto-sizes-contain-inline-css */
 

@@ -52,25 +52,14 @@ export default function RootLayout({
                 if (typeof AOS !== 'undefined') {
                   AOS.init({ disable: window.innerWidth < 768 });
                 }
-                var lazyVideos = [].slice.call(document.querySelectorAll("video.lazy"));
-                if ("IntersectionObserver" in window) {
-                  var lazyVideoObserver = new IntersectionObserver(function(entries, observer) {
-                    entries.forEach(function(video) {
-                      for (var prefix in video.children) {
-                        var videoSource = video.children[prefix];
-                        if (typeof videoSource.tagName === "string" && videoSource.tagName === "SOURCE") {
-                          videoSource.src = videoSource.dataset.src;
-                        }
-                      }
-                      video.load();
-                      video.classList.remove("lazy");
-                      lazyVideoObserver.unobserve(video);
-                    });
-                  });
-                  lazyVideos.forEach(function(video) {
-                    lazyVideoObserver.observe(video);
-                  });
-                }
+                var vids = document.querySelectorAll("video");
+                vids.forEach(function(v) {
+                  v.muted = true;
+                  var p = v.play();
+                  if (p !== undefined) {
+                    p.catch(function() {});
+                  }
+                });
               });
             `,
           }}
