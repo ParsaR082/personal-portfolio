@@ -45,6 +45,36 @@ export default function RootLayout({
         <script src="/wp-includes/js/jquery/jquery-migrate.min.js"></script>
         <script src="/wp-content/plugins/happy-elementor-addons/assets/vendor/dom-purify/purify.min.js"></script>
         <script src="/assets/vendor/npm/aos@2.3.4/dist/aos.min.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener("DOMContentLoaded", function() {
+                if (typeof AOS !== 'undefined') {
+                  AOS.init({ disable: window.innerWidth < 768 });
+                }
+                var lazyVideos = [].slice.call(document.querySelectorAll("video.lazy"));
+                if ("IntersectionObserver" in window) {
+                  var lazyVideoObserver = new IntersectionObserver(function(entries, observer) {
+                    entries.forEach(function(video) {
+                      for (var prefix in video.children) {
+                        var videoSource = video.children[prefix];
+                        if (typeof videoSource.tagName === "string" && videoSource.tagName === "SOURCE") {
+                          videoSource.src = videoSource.dataset.src;
+                        }
+                      }
+                      video.load();
+                      video.classList.remove("lazy");
+                      lazyVideoObserver.unobserve(video);
+                    });
+                  });
+                  lazyVideos.forEach(function(video) {
+                    lazyVideoObserver.observe(video);
+                  });
+                }
+              });
+            `,
+          }}
+        />
       </head>
       <body
         className="home wp-singular page-template page-template-elementor_header_footer page page-id-21460 wp-embed-responsive wp-theme-ohio wp-child-theme-ohio-child ohio-theme-2-0-0 with-header-3 dark-scheme custom-cursor elementor-default elementor-template-full-width elementor-kit-17 elementor-page elementor-page-21460"
