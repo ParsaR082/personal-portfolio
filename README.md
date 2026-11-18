@@ -1,22 +1,26 @@
-# Personal Portfolio - Tamal Sen (Clone)
+# Personal Portfolio - Tamal Sen (Next.js Edition)
 
-Exact replica of [tamalsen.dev](https://tamalsen.dev/) personal portfolio website.
+A high-performance clone of [tamalsen.dev](https://tamalsen.dev/) built with **Next.js 15**, **React 19**, and **TypeScript**.
 
 ## Features
-- Fully responsive layout
-- All original animations (AOS, Isotope, smooth scroll, hover effects)
-- All high-resolution images, SVGs, and graphics preserved locally
-- Self-contained web fonts and icons
-- All project and category pages included
-- 100% offline-ready static website
+- **Next.js App Router**: Optimized routing for Homepage, Projects (`/project/[slug]`), and Categories (`/portfolio-category/[slug]`).
+- **Static Site Generation (SSG)**: Fast initial load and SEO with pre-rendered pages.
+- **Identical Fidelity**: Pixel-perfect layout, high-resolution media, AOS animations, Isotope project filtering, Masonry, Lottie, Typed.js, and custom cursor.
+- **Local Assets**: All fonts, styles, scripts, and media are self-contained in `public/`.
 
-## Live Preview
-To view the site locally, you can open `index.html` in any modern web browser or serve it with any static web server:
+## Getting Started
+
+Run the development server:
 
 ```bash
-# Python
-python -m http.server 3000
+npm run dev
+```
 
-# or npx
-npx serve .
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Production Build
+
+```bash
+npm run build
+npm start
 ```
