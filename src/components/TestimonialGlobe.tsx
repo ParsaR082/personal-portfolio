@@ -5,20 +5,25 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from "react"
 export type SpinDirection = "Forward" | "Reverse";
 export type ColorMode = "Single" | "Dual";
 
-export interface TestimonialCardData {
-  id: number | string;
-  name: string;
-  role: string;
-  company?: string;
-  rating?: number;
-  text: string;
+export interface ContactCardData {
+  id: string;
+  type: "phone" | "email" | "telegram" | "whatsapp" | "github";
+  badge: string;
+  title: string;
+  subtitle: string;
+  value: string;
+  copyValue: string;
+  link: string;
+  actionText: string;
+  description: string;
+  accentColor: string;
 }
 
 export interface TestimonialGlobeProps {
   /** Number of cards (default: 5) */
   cardsCount?: number;
-  /** Custom cards data (defaults to 5 sample cards) */
-  cards?: TestimonialCardData[];
+  /** Custom cards data */
+  cards?: ContactCardData[];
   /** Sphere spin speed in degrees per second (default: 12) */
   spinSpeed?: number;
   /** Spin direction (default: 'Forward') */
@@ -43,46 +48,71 @@ export interface TestimonialGlobeProps {
   style?: React.CSSProperties;
 }
 
-const DEFAULT_CARDS: TestimonialCardData[] = [
+const DEFAULT_CONTACT_CARDS: ContactCardData[] = [
   {
-    id: 1,
-    name: "مارک رابینسون",
-    role: "مدیر ارشد محصول",
-    company: "TechNova Global",
-    rating: 5,
-    text: "همکاری فوق‌العاده با خروجی دقیق و فراتر از انتظار. تسلط عمیق بر فرانت‌اند، معماری مدرن و انیمیشن‌های روان واقعاً کم‌نظیر است.",
+    id: "phone",
+    type: "phone",
+    badge: "۰۱ // تماس صوتی",
+    title: "شماره تماس",
+    subtitle: "پاسخگویی مستقیم",
+    value: "+98 914 512 0736",
+    copyValue: "+989145120736",
+    link: "tel:+989145120736",
+    actionText: "برقراری تماس مستقیم",
+    description: "پاسخگویی سریع جهت هماهنگی پروژه‌ها، مشاوره فنی و گفت‌وگو.",
+    accentColor: "#38bdf8",
   },
   {
-    id: 2,
-    name: "سارا چن",
-    role: "بنیان‌گذار و مدیرعامل",
-    company: "VentureLab",
-    rating: 5,
-    text: "سرعت عمل، دقت در جزئیات بصری و اجرای چشم‌نواز رابط کاربری وب و اپلیکیشن. تجربه‌ای بی‌نقص از ارتباط حرفه‌ای و مهندسی نرم‌افزار.",
+    id: "email",
+    type: "email",
+    badge: "۰۲ // پست الکترونیکی",
+    title: "ایمیل",
+    subtitle: "مکاتبات رسمی",
+    value: "neovoid.team@gmail.com",
+    copyValue: "neovoid.team@gmail.com",
+    link: "mailto:neovoid.team@gmail.com",
+    actionText: "ارسال ایمیل مستقیم",
+    description: "ارسال مستندات پروژه، فایل‌های نیازمندی و دعوت به همکاری رسمی.",
+    accentColor: "#06b6d4",
   },
   {
-    id: 3,
-    name: "الکساندر دوپونت",
-    role: "معمار نرم‌افزار",
-    company: "CloudScale Systems",
-    rating: 5,
-    text: "کدنویسی تمیز، ساختاریافته و با بالاترین استانداردهای کارایی. پیاده‌سازی پروژه‌های پیچیده ری‌اکت و فلاتر با نهایت ظرافت و پایداری.",
+    id: "telegram",
+    type: "telegram",
+    badge: "۰۳ // پیام‌رسان سریع",
+    title: "تلگرام",
+    subtitle: "@Parsa_R082",
+    value: "t.me/Parsa_R082",
+    copyValue: "https://t.me/Parsa_R082",
+    link: "https://t.me/Parsa_R082",
+    actionText: "ارسال پیام در تلگرام",
+    description: "سریع‌ترین روش چت مستقیم، انتقال فایل و هماهنگی لحظه‌ای.",
+    accentColor: "#229ED9",
   },
   {
-    id: 4,
-    name: "مایا استوانوویچ",
-    role: "طراح ارشد رابط و تجربه کاربری (UI/UX)",
-    company: "DesignPulse",
-    rating: 5,
-    text: "تبدیل ایده‌ها و طرح‌های گرافیکی به کدهای تعاملی و پرفورمنس‌بالا، با درک فوق‌العاده از اصول انیمیشن‌های سه‌بعدی و مدرن وب.",
+    id: "whatsapp",
+    type: "whatsapp",
+    badge: "۰۴ // پیام‌رسان",
+    title: "واتس‌اپ",
+    subtitle: "چت و پیام فوری",
+    value: "+98 914 512 0736",
+    copyValue: "+989145120736",
+    link: "https://wa.me/989145120736",
+    actionText: "شروع گفتگو در واتس‌اپ",
+    description: "امکان ارسال پیام متنی، هماهنگی اولیه و پیگیری در واتس‌اپ.",
+    accentColor: "#25D366",
   },
   {
-    id: 5,
-    name: "دیوید کلاین",
-    role: "مدیر مهندسی",
-    company: "Apex Digital Solutions",
-    rating: 5,
-    text: "یکی از بااستعدادترین و متعهدترین توسعه‌دهندگانی که با آن‌ها کار کرده‌ایم. تحویل به موقع، ارتباط عالی و نتایجی در سطح استانداردهای جهانی.",
+    id: "github",
+    type: "github",
+    badge: "۰۵ // گیت‌هاب",
+    title: "گیت‌هاب",
+    subtitle: "ParsaR082",
+    value: "github.com/ParsaR082",
+    copyValue: "https://github.com/ParsaR082",
+    link: "https://github.com/ParsaR082",
+    actionText: "مشاهده پروفایل گیت‌هاب",
+    description: "مشاهده ریپازیتوری‌ها، پروژه‌های متن‌باز و سوابق کدهای من.",
+    accentColor: "#a855f7",
   },
 ];
 
@@ -94,6 +124,42 @@ interface CoreParticle {
   size: number;
   hue: number;
   alpha: number;
+}
+
+function renderCardIcon(type: ContactCardData["type"], color: string) {
+  switch (type) {
+    case "phone":
+      return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+        </svg>
+      );
+    case "email":
+      return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="16" x="2" y="4" rx="2" />
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+        </svg>
+      );
+    case "telegram":
+      return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={color}>
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+        </svg>
+      );
+    case "whatsapp":
+      return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={color}>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.457h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+      );
+    case "github":
+      return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={color}>
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+      );
+  }
 }
 
 export default function TestimonialGlobe({
@@ -122,6 +188,7 @@ export default function TestimonialGlobe({
   const [hue, setHue] = useState<number>(initialHue);
   const [secondHue, setSecondHue] = useState<number>(initialSecondHue);
   const [controlsOpen, setControlsOpen] = useState<boolean>(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // References
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -141,7 +208,7 @@ export default function TestimonialGlobe({
       if (w < 480) {
         setCurrentRadius(Math.min(radius, 175));
       } else if (w < 768) {
-        setCurrentRadius(Math.min(radius, 220));
+        setCurrentRadius(Math.min(radius, 225));
       } else {
         setCurrentRadius(radius);
       }
@@ -153,7 +220,7 @@ export default function TestimonialGlobe({
 
   // Card list
   const cardList = useMemo(() => {
-    const source = customCards && customCards.length > 0 ? customCards : DEFAULT_CARDS;
+    const source = customCards && customCards.length > 0 ? customCards : DEFAULT_CONTACT_CARDS;
     return source.slice(0, cardsCount);
   }, [customCards, cardsCount]);
 
@@ -233,6 +300,18 @@ export default function TestimonialGlobe({
     [cardBaseAngles]
   );
 
+  // Copy to clipboard handler
+  const handleCopy = (e: React.MouseEvent, id: string, textToCopy: string) => {
+    e.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      setCopiedId(id);
+      setTimeout(() => {
+        setCopiedId((curr) => (curr === id ? null : curr));
+      }, 2000);
+    }
+  };
+
   // Pointer drag handlers
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     isDraggingRef.current = true;
@@ -271,7 +350,7 @@ export default function TestimonialGlobe({
     } catch {}
   }, []);
 
-  // Main Canvas & 3D Math RAF Loop (Zero React Re-renders!)
+  // Main Canvas & 3D Math RAF Loop (Direct DOM Transform - Zero React Re-renders!)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -302,7 +381,7 @@ export default function TestimonialGlobe({
       if (!containerRef.current || !canvas) return;
       const rect = containerRef.current.getBoundingClientRect();
       width = rect.width || window.innerWidth;
-      height = rect.height || 650;
+      height = rect.height || 680;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       canvas.width = Math.floor(width * dpr);
@@ -404,7 +483,7 @@ export default function TestimonialGlobe({
       const rotY = rotYRef.current;
       const rotX = rotXRef.current;
       const centerX = width / 2;
-      const centerY = height / 2;
+      const centerY = height / 2 + 10;
       const cameraDistance = 750;
 
       // 2. PROJECT CARDS TO 3D AND DIRECTLY UPDATE DOM STYLES (NO REACT RE-RENDERS!)
@@ -438,9 +517,9 @@ export default function TestimonialGlobe({
         const screenY = centerY + y1 * scale;
 
         const normalizedDepth = Math.max(0, Math.min(1, (z2 + R) / (2 * R)));
-        const cardScale = scale * (0.65 + 0.35 * normalizedDepth);
-        const opacity = 0.25 + 0.75 * Math.pow(normalizedDepth, 1.3);
-        const blur = Math.max(0, (1 - normalizedDepth) * 5);
+        const cardScale = scale * (0.68 + 0.32 * normalizedDepth);
+        const opacity = 0.28 + 0.72 * Math.pow(normalizedDepth, 1.25);
+        const blur = Math.max(0, (1 - normalizedDepth) * 4.5);
         const zIndex = Math.round(normalizedDepth * 1000);
 
         projectedCoords.push({ x: screenX, y: screenY, depth: normalizedDepth });
@@ -448,7 +527,7 @@ export default function TestimonialGlobe({
         // Direct DOM update (blistering fast 60/120 FPS)
         const el = cardElementsRef.current[i];
         if (el) {
-          el.style.transform = `translate3d(${screenX - 145}px, ${screenY - 100}px, 0) scale(${cardScale})`;
+          el.style.transform = `translate3d(${screenX - 150}px, ${screenY - 110}px, 0) scale(${cardScale})`;
           el.style.opacity = `${opacity}`;
           el.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : "none";
           el.style.zIndex = `${zIndex}`;
@@ -472,7 +551,7 @@ export default function TestimonialGlobe({
           }
         }
         ctx.lineWidth = 1;
-        ctx.strokeStyle = `hsla(${primaryHue}, 85%, 65%, 0.22)`;
+        ctx.strokeStyle = `hsla(${primaryHue}, 85%, 65%, 0.25)`;
         ctx.stroke();
       }
 
@@ -555,7 +634,7 @@ export default function TestimonialGlobe({
         width: "100%",
         minHeight: "720px",
         height: "85vh",
-        maxHeight: "900px",
+        maxHeight: "920px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -585,18 +664,19 @@ export default function TestimonialGlobe({
       <div
         style={{
           position: "absolute",
-          top: "30px",
+          top: "24px",
           width: "100%",
           textAlign: "center",
           zIndex: 10,
           pointerEvents: "none",
+          padding: "0 16px",
         }}
       >
         <span
           style={{
             display: "inline-block",
             fontSize: "12px",
-            fontWeight: 600,
+            fontWeight: 700,
             letterSpacing: "2px",
             color: `hsl(${hue}, 90%, 65%)`,
             marginBottom: "8px",
@@ -604,33 +684,35 @@ export default function TestimonialGlobe({
             fontFamily: "monospace",
           }}
         >
-          // نظرات کارفرمایان و همکاران //
+          // ۰۵ // راه‌های ارتباطی //
         </span>
         <h2
           style={{
-            fontSize: "clamp(26px, 4vw, 42px)",
+            fontSize: "clamp(24px, 4vw, 38px)",
             fontWeight: 800,
             margin: "0 0 8px 0",
             color: "#ffffff",
             fontFamily: "'Kalameh', 'Dana', sans-serif",
-            textShadow: "0 2px 15px rgba(0,0,0,0.6)",
+            textShadow: "0 2px 20px rgba(0,0,0,0.8)",
           }}
         >
-          کره تعاملی رضایت مشتریان
+          پل‌های ارتباطی و تماس با من
         </h2>
         <p
           style={{
-            fontSize: "13px",
+            fontSize: "13.5px",
             color: "#94a3b8",
             margin: 0,
             fontFamily: "'Dana', sans-serif",
+            maxWidth: "520px",
+            display: "inline-block",
           }}
         >
-          کره را بچرخانید یا برای مشاهده نزدیک روی هر کارت کلیک کنید
+          کره تعاملی را بچرخانید یا برای مشاهده مستقیم، روی هر کارت کلیک کنید
         </p>
       </div>
 
-      {/* 3. CSS 3D Depth-Projected Testimonial Cards (Rendered Once, Transformed by RAF!) */}
+      {/* 3. CSS 3D Depth-Projected Contact Cards (Rendered Once, Transformed by RAF!) */}
       <div
         style={{
           position: "absolute",
@@ -656,7 +738,7 @@ export default function TestimonialGlobe({
                 position: "absolute",
                 top: 0,
                 left: 0,
-                width: "290px",
+                width: "300px",
                 transform: "translate3d(-9999px, -9999px, 0)",
                 pointerEvents: "auto",
                 cursor: "pointer",
@@ -665,19 +747,20 @@ export default function TestimonialGlobe({
             >
               <div
                 style={{
-                  backgroundColor: "rgba(13, 17, 28, 0.85)",
-                  backdropFilter: "blur(14px)",
-                  WebkitBackdropFilter: "blur(14px)",
-                  border: `1.5px solid hsla(${cardHue}, 75%, 55%, 0.35)`,
-                  borderRadius: "18px",
+                  backgroundColor: "rgba(11, 15, 26, 0.88)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: `1.5px solid ${card.accentColor}55`,
+                  borderRadius: "20px",
                   padding: "20px 22px",
                   color: "#ffffff",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                  boxShadow: `0 15px 35px rgba(0,0,0,0.6), 0 0 20px ${card.accentColor}15`,
                   position: "relative",
                   overflow: "hidden",
+                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
                 }}
               >
-                {/* Top Glowing Line */}
+                {/* Top Glowing Accent Line */}
                 <div
                   style={{
                     position: "absolute",
@@ -685,101 +768,205 @@ export default function TestimonialGlobe({
                     left: "20px",
                     right: "20px",
                     height: "2px",
-                    background: `linear-gradient(90deg, transparent, hsl(${cardHue}, 90%, 65%), transparent)`,
+                    background: `linear-gradient(90deg, transparent, ${card.accentColor}, transparent)`,
                   }}
                 />
 
-                {/* Rating & Quote */}
+                {/* Header: Icon + Titles + Badge */}
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    marginBottom: "12px",
+                    justifyContent: "space-between",
+                    marginBottom: "14px",
                   }}
                 >
-                  <div style={{ color: "#facc15", fontSize: "14px", letterSpacing: "2px" }}>
-                    {"★".repeat(card.rating || 5)}
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "12px",
+                        backgroundColor: `${card.accentColor}18`,
+                        border: `1px solid ${card.accentColor}44`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {renderCardIcon(card.type, card.accentColor)}
+                    </div>
+                    <div>
+                      <h4
+                        style={{
+                          margin: 0,
+                          fontSize: "16px",
+                          fontWeight: 800,
+                          color: "#ffffff",
+                          fontFamily: "'Kalameh', 'Dana', sans-serif",
+                        }}
+                      >
+                        {card.title}
+                      </h4>
+                      <span
+                        style={{
+                          fontSize: "11.5px",
+                          color: "#94a3b8",
+                          display: "block",
+                          fontFamily: "'Dana', sans-serif",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {card.subtitle}
+                      </span>
+                    </div>
                   </div>
+
                   <span
                     style={{
-                      fontSize: "22px",
-                      lineHeight: 1,
-                      color: `hsl(${cardHue}, 90%, 65%)`,
-                      fontFamily: "serif",
-                      opacity: 0.8,
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: card.accentColor,
+                      fontFamily: "monospace",
+                      opacity: 0.9,
                     }}
                   >
-                    “
+                    {card.badge.split("//")[0]}
                   </span>
                 </div>
 
-                {/* Text */}
-                <p
+                {/* Value Pill + Copy Button */}
+                <div
                   style={{
-                    fontSize: "13.5px",
-                    lineHeight: 1.75,
-                    color: "#e2e8f0",
-                    margin: "0 0 16px 0",
-                    fontFamily: "'Dana', sans-serif",
-                    fontWeight: 400,
+                    backgroundColor: "rgba(0, 0, 0, 0.45)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: "10px",
+                    padding: "7px 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "12px",
                   }}
                 >
-                  {card.text}
+                  <span
+                    style={{
+                      direction: "ltr",
+                      fontFamily: "monospace, 'Dana', sans-serif",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#f8fafc",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: "190px",
+                    }}
+                  >
+                    {card.value}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopy(e, card.id, card.copyValue)}
+                    title="کپی کردن"
+                    style={{
+                      background: copiedId === card.id ? "rgba(34, 197, 94, 0.25)" : "rgba(255, 255, 255, 0.08)",
+                      border: `1px solid ${copiedId === card.id ? "#22c55e" : "rgba(255, 255, 255, 0.15)"}`,
+                      borderRadius: "6px",
+                      padding: "4px 8px",
+                      fontSize: "11px",
+                      color: copiedId === card.id ? "#4ade80" : "#94a3b8",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      transition: "all 0.2s ease",
+                      fontFamily: "'Dana', sans-serif",
+                    }}
+                  >
+                    {copiedId === card.id ? (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>کپی شد</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                        <span>کپی</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: "12.5px",
+                    lineHeight: 1.65,
+                    color: "#cbd5e1",
+                    margin: "0 0 16px 0",
+                    fontFamily: "'Dana', sans-serif",
+                    minHeight: "40px",
+                  }}
+                >
+                  {card.description}
                 </p>
 
-                {/* Author Info */}
-                <div
+                {/* Action Link Button */}
+                <a
+                  href={card.link}
+                  target={card.link.startsWith("http") ? "_blank" : undefined}
+                  rel={card.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                  onClick={(e) => e.stopPropagation()}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px",
-                    borderTop: "1px solid rgba(255,255,255,0.08)",
-                    paddingTop: "12px",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "9px 16px",
+                    borderRadius: "10px",
+                    background: `linear-gradient(135deg, ${card.accentColor}25, ${card.accentColor}50)`,
+                    border: `1px solid ${card.accentColor}77`,
+                    color: "#ffffff",
+                    fontSize: "12.5px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    boxShadow: `0 4px 15px ${card.accentColor}22`,
+                    transition: "all 0.25s ease",
+                    fontFamily: "'Dana', sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}45, ${card.accentColor}85)`;
+                    e.currentTarget.style.boxShadow = `0 6px 20px ${card.accentColor}45`;
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}25, ${card.accentColor}50)`;
+                    e.currentTarget.style.boxShadow = `0 4px 15px ${card.accentColor}22`;
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
-                  <div
-                    style={{
-                      width: "38px",
-                      height: "38px",
-                      borderRadius: "50%",
-                      backgroundColor: `hsla(${cardHue}, 80%, 45%, 0.3)`,
-                      border: `1px solid hsl(${cardHue}, 85%, 65%)`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "15px",
-                      fontWeight: 700,
-                      color: "#ffffff",
-                      flexShrink: 0,
-                    }}
+                  <span>{card.actionText}</span>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ transform: "rotate(180deg)" }}
                   >
-                    {card.name.charAt(0)}
-                  </div>
-                  <div style={{ overflow: "hidden" }}>
-                    <h4
-                      style={{
-                        margin: 0,
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        color: "#ffffff",
-                        fontFamily: "'Dana', sans-serif",
-                      }}
-                    >
-                      {card.name}
-                    </h4>
-                    <span
-                      style={{
-                        fontSize: "11.5px",
-                        color: "#94a3b8",
-                        display: "block",
-                        fontFamily: "'Dana', sans-serif",
-                      }}
-                    >
-                      {card.role} {card.company ? `• ${card.company}` : ""}
-                    </span>
-                  </div>
-                </div>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </a>
               </div>
             </div>
           );
@@ -815,7 +1002,7 @@ export default function TestimonialGlobe({
                 boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
                 backdropFilter: "blur(10px)",
               }}
-              title="Globe Settings"
+              title="تنظیمات کره"
             >
               ⚙
             </button>
@@ -844,7 +1031,7 @@ export default function TestimonialGlobe({
                   paddingBottom: "8px",
                 }}
               >
-                <span style={{ fontWeight: "bold", color: `hsl(${hue}, 90%, 65%)` }}>Testimonial Globe</span>
+                <span style={{ fontWeight: "bold", color: `hsl(${hue}, 90%, 65%)` }}>Contact Globe</span>
                 <button
                   onClick={() => setControlsOpen(false)}
                   style={{
@@ -857,22 +1044,6 @@ export default function TestimonialGlobe({
                 >
                   ✕
                 </button>
-              </div>
-
-              {/* Cards Count */}
-              <div style={{ marginBottom: "10px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>Cards:</span>
-                  <span>{cardsCount}</span>
-                </div>
-                <input
-                  type="range"
-                  min="3"
-                  max="5"
-                  value={cardsCount}
-                  onChange={(e) => setCardsCount(parseInt(e.target.value))}
-                  style={{ width: "100%", accentColor: `hsl(${hue}, 90%, 60%)` }}
-                />
               </div>
 
               {/* Spin Speed */}
