@@ -10,7 +10,6 @@ export interface TestimonialCardData {
   name: string;
   role: string;
   company?: string;
-  avatar?: string;
   rating?: number;
   text: string;
 }
@@ -122,7 +121,6 @@ export default function TestimonialGlobe({
   const [colorMode, setColorMode] = useState<ColorMode>(initialColor);
   const [hue, setHue] = useState<number>(initialHue);
   const [secondHue, setSecondHue] = useState<number>(initialSecondHue);
-  const [activeCardId, setActiveCardId] = useState<number | string | null>(null);
   const [controlsOpen, setControlsOpen] = useState<boolean>(false);
 
   // References
@@ -130,6 +128,9 @@ export default function TestimonialGlobe({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const isPausedRef = useRef<boolean>(false);
+
+  // DOM Card Element Refs for direct zero-rerender GPU transform updates
+  const cardElementsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Responsive radius adjustment
   const [currentRadius, setCurrentRadius] = useState<number>(initialRadius);
@@ -150,19 +151,17 @@ export default function TestimonialGlobe({
     return () => window.removeEventListener("resize", handleResize);
   }, [radius]);
 
-  // Spherical Coordinates for cards (evenly distributed with natural elevation variations)
+  // Card list
   const cardList = useMemo(() => {
     const source = customCards && customCards.length > 0 ? customCards : DEFAULT_CARDS;
     return source.slice(0, cardsCount);
   }, [customCards, cardsCount]);
 
-  // Sphere base positions for N cards
+  // Spherical Coordinates
   const cardBaseAngles = useMemo(() => {
     const N = cardList.length;
     const angles: Array<{ phi: number; theta: number }> = [];
-
-    // Distribute around the sphere with balanced latitude and longitude
-    const elevationOffsets = [0, 0.38, -0.32, 0.28, -0.4, 0.35, -0.25, 0.2];
+    const elevationOffsets = [0, 0.36, -0.32, 0.28, -0.38, 0.32, -0.26];
     for (let i = 0; i < N; i++) {
       const theta = (i * 2 * Math.PI) / N;
       const phi = elevationOffsets[i % elevationOffsets.length];
@@ -171,36 +170,20 @@ export default function TestimonialGlobe({
     return angles;
   }, [cardList.length]);
 
-  // Current Globe 3D orientation
+  // Rotation state
   const rotYRef = useRef<number>(0); // Yaw
-  const rotXRef = useRef<number>(0.15); // Pitch (slight tilt)
+  const rotXRef = useRef<number>(0.12); // Pitch
   const velYRef = useRef<number>(0);
   const velXRef = useRef<number>(0);
 
-  // Target rotation when a card is clicked to bring to front
+  // Bring to front target
   const targetRotationRef = useRef<{ active: boolean; targetY: number; targetX: number } | null>(null);
 
   // Drag interaction refs
   const isDraggingRef = useRef<boolean>(false);
   const lastPointerRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
 
-  // Projected card screen positions state (for rendering DOM cards)
-  const [projectedCards, setProjectedCards] = useState<
-    Array<{
-      card: TestimonialCardData;
-      x: number;
-      y: number;
-      z: number;
-      depth: number;
-      scale: number;
-      opacity: number;
-      blur: number;
-      zIndex: number;
-      isFront: boolean;
-    }>
-  >([]);
-
-  // Synchronous settings ref for animation loop
+  // Settings ref for synchronous access in RAF loop
   const settingsRef = useRef({
     spinSpeed,
     spinDirection,
@@ -227,17 +210,13 @@ export default function TestimonialGlobe({
 
   // Click card to bring to front
   const bringCardToFront = useCallback(
-    (index: number, cardId: number | string) => {
-      setActiveCardId(cardId);
+    (index: number) => {
       const angle = cardBaseAngles[index];
       if (!angle) return;
 
-      // We want this card's normal (phi, theta + rotY) to point directly at the camera (x=0, y=0, z=+R)
-      // That means: rotY = -theta, rotX = -phi
       let targetY = -angle.theta;
       let targetX = -angle.phi;
 
-      // Wrap targetY to shortest angular path from current rotY
       const currentY = rotYRef.current;
       const twoPi = Math.PI * 2;
       while (targetY - currentY > Math.PI) targetY -= twoPi;
@@ -257,7 +236,7 @@ export default function TestimonialGlobe({
   // Pointer drag handlers
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     isDraggingRef.current = true;
-    targetRotationRef.current = null; // cancel bring-to-front animation if user drags
+    targetRotationRef.current = null;
     lastPointerRef.current = {
       x: e.clientX,
       y: e.clientY,
@@ -275,9 +254,9 @@ export default function TestimonialGlobe({
     const dx = e.clientX - lastPointerRef.current.x;
     const dy = e.clientY - lastPointerRef.current.y;
 
-    const sensitivity = 0.0055;
+    const sensitivity = 0.005;
     rotYRef.current += dx * sensitivity;
-    rotXRef.current = Math.max(-0.65, Math.min(0.65, rotXRef.current - dy * sensitivity));
+    rotXRef.current = Math.max(-0.6, Math.min(0.6, rotXRef.current - dy * sensitivity));
 
     velYRef.current = (dx * sensitivity) / dt;
     velXRef.current = -(dy * sensitivity) / dt;
@@ -292,7 +271,7 @@ export default function TestimonialGlobe({
     } catch {}
   }, []);
 
-  // Main Canvas & 3D Math RAF Loop
+  // Main Canvas & 3D Math RAF Loop (Zero React Re-renders!)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -304,18 +283,18 @@ export default function TestimonialGlobe({
     let dpr = 1;
 
     // Object Pool for glowing core orbit particles
-    const CORE_PARTICLE_COUNT = 50;
+    const CORE_PARTICLE_COUNT = 36;
     const coreParticles: CoreParticle[] = new Array(CORE_PARTICLE_COUNT);
 
     for (let i = 0; i < CORE_PARTICLE_COUNT; i++) {
       coreParticles[i] = {
         angle: Math.random() * Math.PI * 2,
         elevation: (Math.random() - 0.5) * Math.PI,
-        speed: (Math.random() * 0.4 + 0.2) * (Math.random() > 0.5 ? 1 : -1),
-        radius: Math.random() * 80 + 30,
+        speed: (Math.random() * 0.35 + 0.15) * (Math.random() > 0.5 ? 1 : -1),
+        radius: Math.random() * 70 + 25,
         size: Math.random() * 2 + 1,
         hue: i % 2 === 0 ? settingsRef.current.hue : settingsRef.current.secondHue,
-        alpha: Math.random() * 0.6 + 0.3,
+        alpha: Math.random() * 0.5 + 0.3,
       };
     }
 
@@ -323,7 +302,7 @@ export default function TestimonialGlobe({
       if (!containerRef.current || !canvas) return;
       const rect = containerRef.current.getBoundingClientRect();
       width = rect.width || window.innerWidth;
-      height = rect.height || 700;
+      height = rect.height || 650;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       canvas.width = Math.floor(width * dpr);
@@ -371,15 +350,17 @@ export default function TestimonialGlobe({
     observer.observe(canvas);
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
     let corePulseTime = 0;
 
-    // Render loop
+    // Projected point coordinates for nexus links
+    const projectedCoords: Array<{ x: number; y: number; depth: number }> = [];
+
+    // The high-performance render loop
     const loop = (currentTime: number) => {
       if (isPausedRef.current) return;
 
       const rawDt = (currentTime - lastTime) / 1000;
-      const dt = Math.min(Math.max(rawDt, 0), 0.1); // clamped dt
+      const dt = Math.min(Math.max(rawDt, 0), 0.1);
       lastTime = currentTime;
       corePulseTime += dt;
 
@@ -396,27 +377,24 @@ export default function TestimonialGlobe({
 
       // 1. UPDATE SPHERE ROTATION
       if (targetRotationRef.current && targetRotationRef.current.active) {
-        // Bring to front interpolation
         const { targetY, targetX } = targetRotationRef.current;
-        const lerpFactor = 1 - Math.pow(0.001, dt); // smooth exponential ease-out
+        const lerpFactor = 1 - Math.pow(0.001, dt);
         rotYRef.current += (targetY - rotYRef.current) * lerpFactor;
         rotXRef.current += (targetX - rotXRef.current) * lerpFactor;
 
-        if (Math.abs(targetY - rotYRef.current) < 0.005 && Math.abs(targetX - rotXRef.current) < 0.005) {
+        if (Math.abs(targetY - rotYRef.current) < 0.004 && Math.abs(targetX - rotXRef.current) < 0.004) {
           rotYRef.current = targetY;
           rotXRef.current = targetX;
           targetRotationRef.current.active = false;
         }
       } else if (!isDraggingRef.current) {
-        // Momentum coasting
         if (Math.abs(velYRef.current) > 0.01 || Math.abs(velXRef.current) > 0.01) {
           const friction = Math.pow(0.92, dt * 60);
           velYRef.current *= friction;
           velXRef.current *= friction;
           rotYRef.current += velYRef.current * dt;
-          rotXRef.current = Math.max(-0.65, Math.min(0.65, rotXRef.current + velXRef.current * dt));
+          rotXRef.current = Math.max(-0.6, Math.min(0.6, rotXRef.current + velXRef.current * dt));
         } else if (spinning && !motionQuery.matches) {
-          // Regular auto-spin
           const dirSign = dir === "Forward" ? 1 : -1;
           const radPerSec = (speed * Math.PI) / 180;
           rotYRef.current += radPerSec * dirSign * dt;
@@ -429,93 +407,73 @@ export default function TestimonialGlobe({
       const centerY = height / 2;
       const cameraDistance = 750;
 
-      // 2. PROJECT CARDS TO 3D & COMPUTE DEPTH
+      // 2. PROJECT CARDS TO 3D AND DIRECTLY UPDATE DOM STYLES (NO REACT RE-RENDERS!)
       const N = cardList.length;
-      const projected = new Array(N);
-      let maxZ = -Infinity;
-      let frontIndex = 0;
+      projectedCoords.length = 0;
+
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
 
       for (let i = 0; i < N; i++) {
-        const { phi, theta } = cardBaseAngles[i] || { phi: 0, theta: 0 };
-
-        // Point on unit sphere
-        const cosPhi = Math.cos(phi);
-        const sinPhi = Math.sin(phi);
-        const cosTheta = Math.cos(theta);
-        const sinTheta = Math.sin(theta);
+        const angle = cardBaseAngles[i] || { phi: 0, theta: 0 };
+        const cosPhi = Math.cos(angle.phi);
+        const sinPhi = Math.sin(angle.phi);
+        const cosTheta = Math.cos(angle.theta);
+        const sinTheta = Math.sin(angle.theta);
 
         const x0 = R * cosPhi * sinTheta;
         const y0 = -R * sinPhi;
         const z0 = R * cosPhi * cosTheta;
 
-        // Rotate around X (pitch)
-        const cosX = Math.cos(rotX);
-        const sinX = Math.sin(rotX);
         const y1 = y0 * cosX - z0 * sinX;
         const z1 = y0 * sinX + z0 * cosX;
 
-        // Rotate around Y (yaw)
-        const cosY = Math.cos(rotY);
-        const sinY = Math.sin(rotY);
         const x2 = x0 * cosY + z1 * sinY;
         const z2 = -x0 * sinY + z1 * cosY;
-        const y2 = y1;
 
-        // Perspective projection
         const scale = cameraDistance / (cameraDistance - z2);
         const screenX = centerX + x2 * scale;
-        const screenY = centerY + y2 * scale;
+        const screenY = centerY + y1 * scale;
 
-        const normalizedDepth = (z2 + R) / (2 * R); // 0 (back) to 1 (front)
-        const clampedDepth = Math.max(0, Math.min(1, normalizedDepth));
+        const normalizedDepth = Math.max(0, Math.min(1, (z2 + R) / (2 * R)));
+        const cardScale = scale * (0.65 + 0.35 * normalizedDepth);
+        const opacity = 0.25 + 0.75 * Math.pow(normalizedDepth, 1.3);
+        const blur = Math.max(0, (1 - normalizedDepth) * 5);
+        const zIndex = Math.round(normalizedDepth * 1000);
 
-        if (z2 > maxZ) {
-          maxZ = z2;
-          frontIndex = i;
+        projectedCoords.push({ x: screenX, y: screenY, depth: normalizedDepth });
+
+        // Direct DOM update (blistering fast 60/120 FPS)
+        const el = cardElementsRef.current[i];
+        if (el) {
+          el.style.transform = `translate3d(${screenX - 145}px, ${screenY - 100}px, 0) scale(${cardScale})`;
+          el.style.opacity = `${opacity}`;
+          el.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : "none";
+          el.style.zIndex = `${zIndex}`;
+          el.style.pointerEvents = isDraggingRef.current ? "none" : "auto";
         }
-
-        projected[i] = {
-          card: cardList[i],
-          x: screenX,
-          y: screenY,
-          z: z2,
-          depth: clampedDepth,
-          scale: scale * (0.65 + 0.35 * clampedDepth),
-          opacity: 0.22 + 0.78 * Math.pow(clampedDepth, 1.3),
-          blur: Math.max(0, (1 - clampedDepth) * 5),
-          zIndex: Math.round(clampedDepth * 1000),
-          isFront: false,
-        };
       }
 
-      if (projected[frontIndex]) {
-        projected[frontIndex].isFront = true;
-      }
-
-      setProjectedCards(projected);
-
-      // 3. CANVAS 2D RENDER (Clear fully every frame - no ghost burn-in)
+      // 3. CANVAS 2D RENDER (Crisp clearRect every frame)
       ctx.clearRect(0, 0, width, height);
 
-      // A. Draw Nexus Links (between neighboring cards on virtual sphere)
-      if (showLinks) {
-        ctx.lineWidth = 1;
+      // A. Draw Nexus Links (Single batched path)
+      if (showLinks && projectedCoords.length > 1) {
+        ctx.beginPath();
         for (let i = 0; i < N; i++) {
           const nextIdx = (i + 1) % N;
-          const p1 = projected[i];
-          const p2 = projected[nextIdx];
-          if (!p1 || !p2) continue;
-
-          const avgDepth = (p1.depth + p2.depth) / 2;
-          const linkAlpha = 0.12 + 0.35 * avgDepth;
-          const linkHue = mode === "Dual" ? (i % 2 === 0 ? primaryHue : altHue) : primaryHue;
-
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `hsla(${linkHue}, 85%, 65%, ${linkAlpha})`;
-          ctx.stroke();
+          const p1 = projectedCoords[i];
+          const p2 = projectedCoords[nextIdx];
+          if (p1 && p2) {
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+          }
         }
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = `hsla(${primaryHue}, 85%, 65%, 0.22)`;
+        ctx.stroke();
       }
 
       // B. Draw Orbiting Core Stardust (Object Pool, zero GC)
@@ -523,19 +481,13 @@ export default function TestimonialGlobe({
         const cp = coreParticles[i];
         cp.angle += cp.speed * dt;
 
-        // Position on small core sphere
         const px0 = cp.radius * Math.cos(cp.elevation) * Math.sin(cp.angle);
         const py0 = cp.radius * Math.sin(cp.elevation);
         const pz0 = cp.radius * Math.cos(cp.elevation) * Math.cos(cp.angle);
 
-        // Rotate with globe
-        const cosX = Math.cos(rotX);
-        const sinX = Math.sin(rotX);
         const py1 = py0 * cosX - pz0 * sinX;
         const pz1 = py0 * sinX + pz0 * cosX;
 
-        const cosY = Math.cos(rotY);
-        const sinY = Math.sin(rotY);
         const px2 = px0 * cosY + pz1 * sinY;
         const pz2 = -px0 * sinY + pz1 * cosY;
 
@@ -553,31 +505,29 @@ export default function TestimonialGlobe({
         ctx.fill();
       }
 
-      // C. Draw Central Glowing Core
+      // C. Draw Central Glowing Core (Clean 2-stop gradient, no heavy shadowBlur)
       const corePulse = Math.sin(corePulseTime * 2.2);
-      const coreRadius = (45 + corePulse * 6) * (width < 768 ? 0.75 : 1);
-      const outerGlowRadius = coreRadius * 2.8;
+      const coreRadius = (45 + corePulse * 5) * (width < 768 ? 0.75 : 1);
+      const outerGlowRadius = coreRadius * 2.5;
 
       const radialGrad = ctx.createRadialGradient(
         centerX,
         centerY,
-        coreRadius * 0.15,
+        coreRadius * 0.1,
         centerX,
         centerY,
         outerGlowRadius
       );
 
-      radialGrad.addColorStop(0, `hsla(${primaryHue}, 95%, 85%, 0.85)`);
-      radialGrad.addColorStop(0.35, `hsla(${primaryHue}, 90%, 65%, 0.45)`);
-      radialGrad.addColorStop(0.7, `hsla(${mode === "Dual" ? altHue : primaryHue}, 85%, 55%, 0.15)`);
+      radialGrad.addColorStop(0, `hsla(${primaryHue}, 95%, 85%, 0.8)`);
+      radialGrad.addColorStop(0.35, `hsla(${primaryHue}, 90%, 65%, 0.35)`);
+      radialGrad.addColorStop(0.7, `hsla(${mode === "Dual" ? altHue : primaryHue}, 85%, 55%, 0.12)`);
       radialGrad.addColorStop(1, `hsla(${mode === "Dual" ? altHue : primaryHue}, 80%, 45%, 0)`);
 
-      ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, outerGlowRadius, 0, Math.PI * 2);
       ctx.fillStyle = radialGrad;
       ctx.fill();
-      ctx.restore();
 
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -617,7 +567,7 @@ export default function TestimonialGlobe({
         ...style,
       }}
     >
-      {/* 1. Canvas 2D Layer (Central Glowing Core, Orbiting Stardust & Nexus Links) */}
+      {/* 1. Canvas 2D Layer */}
       <canvas
         ref={canvasRef}
         style={{
@@ -680,7 +630,7 @@ export default function TestimonialGlobe({
         </p>
       </div>
 
-      {/* 3. CSS 3D Depth-Projected Testimonial Cards */}
+      {/* 3. CSS 3D Depth-Projected Testimonial Cards (Rendered Once, Transformed by RAF!) */}
       <div
         style={{
           position: "absolute",
@@ -689,51 +639,45 @@ export default function TestimonialGlobe({
           zIndex: 2,
         }}
       >
-        {projectedCards.map((item, idx) => {
-          const { card, x, y, scale, opacity, blur, zIndex, isFront } = item;
-          const isActive = card.id === activeCardId || (isFront && activeCardId === null);
+        {cardList.map((card, idx) => {
           const cardHue = colorMode === "Dual" ? (idx % 2 === 0 ? hue : secondHue) : hue;
 
           return (
             <div
               key={card.id}
+              ref={(el) => {
+                cardElementsRef.current[idx] = el;
+              }}
               onClick={(e) => {
                 e.stopPropagation();
-                bringCardToFront(idx, card.id);
+                bringCardToFront(idx);
               }}
               style={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 width: "290px",
-                transform: `translate3d(${x - 145}px, ${y - 100}px, 0) scale(${scale})`,
-                opacity: opacity,
-                filter: blur > 0.3 ? `blur(${blur}px)` : "none",
-                zIndex: zIndex,
-                pointerEvents: isDraggingRef.current ? "none" : "auto",
+                transform: "translate3d(-9999px, -9999px, 0)",
+                pointerEvents: "auto",
                 cursor: "pointer",
-                transition: "box-shadow 0.3s ease, border-color 0.3s ease",
+                willChange: "transform, opacity, filter",
               }}
             >
               <div
                 style={{
-                  backgroundColor: "rgba(13, 17, 28, 0.82)",
+                  backgroundColor: "rgba(13, 17, 28, 0.85)",
                   backdropFilter: "blur(14px)",
                   WebkitBackdropFilter: "blur(14px)",
-                  border: `1.5px solid ${
-                    isActive ? `hsl(${cardHue}, 90%, 65%)` : `hsla(${cardHue}, 75%, 55%, 0.25)`
-                  }`,
+                  border: `1.5px solid hsla(${cardHue}, 75%, 55%, 0.35)`,
                   borderRadius: "18px",
                   padding: "20px 22px",
                   color: "#ffffff",
-                  boxShadow: isActive
-                    ? `0 14px 40px rgba(0,0,0,0.7), 0 0 25px hsla(${cardHue}, 90%, 60%, 0.45)`
-                    : "0 10px 30px rgba(0,0,0,0.5)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                   position: "relative",
                   overflow: "hidden",
                 }}
               >
-                {/* Top Subtle Glow Line */}
+                {/* Top Glowing Line */}
                 <div
                   style={{
                     position: "absolute",
@@ -745,7 +689,7 @@ export default function TestimonialGlobe({
                   }}
                 />
 
-                {/* Rating Stars & Quote Icon */}
+                {/* Rating & Quote */}
                 <div
                   style={{
                     display: "flex",
@@ -770,7 +714,7 @@ export default function TestimonialGlobe({
                   </span>
                 </div>
 
-                {/* Testimonial Quote Text */}
+                {/* Text */}
                 <p
                   style={{
                     fontSize: "13.5px",
@@ -1058,4 +1002,3 @@ export default function TestimonialGlobe({
     </div>
   );
 }
-

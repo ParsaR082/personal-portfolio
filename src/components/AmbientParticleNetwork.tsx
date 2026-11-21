@@ -143,9 +143,10 @@ export default function AmbientParticleNetwork({
     // Function to calculate target particle count based on density and viewport size
     const calculateTargetCount = (w: number, h: number, dens: number) => {
       const area = w * h;
-      const base = area / 16000;
+      const base = area / 24000;
       const count = Math.round(base * (dens / 2.5));
-      return Math.min(Math.max(count, 20), MAX_POOL_SIZE);
+      const maxCap = w < 768 ? 35 : 85;
+      return Math.min(Math.max(count, 18), maxCap);
     };
 
     // Initialize or resize active particles
@@ -346,10 +347,10 @@ export default function AmbientParticleNetwork({
       // 2. RENDER (Fully clear canvas every frame - zero ghost burn-in)
       ctx.clearRect(0, 0, width, height);
 
-      // A. Draw Proximity Lines
+      // A. Draw Proximity Lines (Batched single stroke for maximum 120 FPS performance)
       const maxDistSq = maxLinkDist * maxLinkDist;
       ctx.lineWidth = 1;
-
+      ctx.beginPath();
       for (let i = 0; i < activeCount; i++) {
         const p1 = particlePool[i];
         for (let j = i + 1; j < activeCount; j++) {
@@ -359,50 +360,52 @@ export default function AmbientParticleNetwork({
           const distSq = dx * dx + dy * dy;
 
           if (distSq < maxDistSq) {
-            const dist = Math.sqrt(distSq);
-            const lineAlpha = (1 - dist / maxLinkDist) * 0.32;
-            const avgHue = (p1.hue + p2.hue) / 2;
-
-            ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(${avgHue}, 85%, 65%, ${lineAlpha})`;
-            ctx.stroke();
           }
         }
       }
+      ctx.strokeStyle = `hsla(${settingsRef.current.hue}, 85%, 65%, 0.16)`;
+      ctx.stroke();
 
-      // B. Draw Fading Trails (if enabled)
+      // B. Draw Fading Trails (Batched single stroke)
       if (trailsOn) {
+        ctx.beginPath();
         for (let i = 0; i < activeCount; i++) {
           const p = particlePool[i];
           const trailLen = p.trail.length;
           if (trailLen > 1) {
-            ctx.beginPath();
             ctx.moveTo(p.trail[0].x, p.trail[0].y);
             for (let k = 1; k < trailLen; k++) {
               ctx.lineTo(p.trail[k].x, p.trail[k].y);
             }
-            ctx.strokeStyle = `hsla(${p.hue}, 90%, 65%, ${p.alpha * 0.18})`;
-            ctx.lineWidth = p.radius * 0.7;
-            ctx.stroke();
           }
         }
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = `hsla(${settingsRef.current.hue}, 85%, 65%, 0.14)`;
+        ctx.stroke();
       }
 
-      // C. Draw Glowing Nodes
-      // We use shadowBlur for glowing aura and a bright solid core
-      ctx.shadowBlur = 9;
+      // C. Draw Glowing Nodes (2-pass fill, zero expensive shadowBlur)
+      // Pass 1: Outer soft glow halo
+      ctx.beginPath();
       for (let i = 0; i < activeCount; i++) {
         const p = particlePool[i];
-        ctx.shadowColor = `hsla(${p.hue}, 95%, 65%, ${p.alpha * 0.75})`;
-        ctx.fillStyle = `hsla(${p.hue}, 95%, 75%, ${p.alpha})`;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(p.x + p.radius * 2.2, p.y);
+        ctx.arc(p.x, p.y, p.radius * 2.2, 0, Math.PI * 2);
       }
-      ctx.shadowBlur = 0; // Reset for next frame
+      ctx.fillStyle = `hsla(${settingsRef.current.hue}, 90%, 65%, 0.18)`;
+      ctx.fill();
+
+      // Pass 2: Bright solid core
+      ctx.beginPath();
+      for (let i = 0; i < activeCount; i++) {
+        const p = particlePool[i];
+        ctx.moveTo(p.x + p.radius, p.y);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      }
+      ctx.fillStyle = `hsla(${settingsRef.current.hue}, 95%, 80%, 0.85)`;
+      ctx.fill();
 
       rafRef.current = requestAnimationFrame(loop);
     };
