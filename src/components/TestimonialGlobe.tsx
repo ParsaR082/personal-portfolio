@@ -247,7 +247,9 @@ export default function TestimonialGlobe({
   const targetRotationRef = useRef<{ active: boolean; targetY: number; targetX: number } | null>(null);
 
   // Drag interaction refs
+  const isPointerDownRef = useRef<boolean>(false);
   const isDraggingRef = useRef<boolean>(false);
+  const dragStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const lastPointerRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
 
   // Settings ref for synchronous access in RAF loop
@@ -300,22 +302,72 @@ export default function TestimonialGlobe({
     [cardBaseAngles]
   );
 
-  // Copy to clipboard handler
-  const handleCopy = (e: React.MouseEvent, id: string, textToCopy: string) => {
+  // Robust copy with clipboard API and execCommand fallback
+  const handleCopy = useCallback((e: React.MouseEvent, id: string, textToCopy: string) => {
     e.stopPropagation();
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(textToCopy);
+    e.preventDefault();
+
+    const applyFeedback = () => {
       setCopiedId(id);
       setTimeout(() => {
         setCopiedId((curr) => (curr === id ? null : curr));
-      }, 2000);
+      }, 2500);
+    };
+
+    if (typeof navigator !== "undefined" && navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          applyFeedback();
+        })
+        .catch(() => {
+          fallbackCopy(textToCopy, applyFeedback);
+        });
+    } else {
+      fallbackCopy(textToCopy, applyFeedback);
+    }
+  }, []);
+
+  const fallbackCopy = (text: string, onSuccess: () => void) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "-9999px";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      onSuccess();
+    } catch (err) {
+      console.error("Copy failed", err);
     }
   };
 
-  // Pointer drag handlers
+  // Direct action click handler ensuring link is opened
+  const handleActionClick = useCallback((e: React.MouseEvent, link: string) => {
+    e.stopPropagation();
+    if (link.startsWith("http")) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    } else {
+      window.location.href = link;
+    }
+  }, []);
+
+  // Pointer drag handlers - non-intrusive, threshold-based
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    isDraggingRef.current = true;
-    targetRotationRef.current = null;
+    // If clicked on an interactive control or button/link, let it pass through cleanly!
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button, input, textarea, select")) {
+      return;
+    }
+
+    isPointerDownRef.current = true;
+    isDraggingRef.current = false;
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
     lastPointerRef.current = {
       x: e.clientX,
       y: e.clientY,
@@ -323,15 +375,33 @@ export default function TestimonialGlobe({
     };
     velYRef.current = 0;
     velXRef.current = 0;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    targetRotationRef.current = null;
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    const now = performance.now();
-    const dt = Math.max((now - lastPointerRef.current.time) / 1000, 0.008);
+    if (!isPointerDownRef.current) return;
+
     const dx = e.clientX - lastPointerRef.current.x;
     const dy = e.clientY - lastPointerRef.current.y;
+    const totalDist = Math.hypot(
+      e.clientX - dragStartPosRef.current.x,
+      e.clientY - dragStartPosRef.current.y
+    );
+
+    // Threshold: Only initiate sphere drag if pointer moved more than 6px
+    if (!isDraggingRef.current) {
+      if (totalDist > 6) {
+        isDraggingRef.current = true;
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {}
+      } else {
+        return;
+      }
+    }
+
+    const now = performance.now();
+    const dt = Math.max((now - lastPointerRef.current.time) / 1000, 0.008);
 
     const sensitivity = 0.005;
     rotYRef.current += dx * sensitivity;
@@ -344,10 +414,16 @@ export default function TestimonialGlobe({
   }, []);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
-    isDraggingRef.current = false;
-    try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {}
+    if (isDraggingRef.current) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+    isPointerDownRef.current = false;
+    // Keep isDraggingRef true for a microtick so click events generated by pointerup can distinguish drag from click
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 40);
   }, []);
 
   // Main Canvas & 3D Math RAF Loop (Direct DOM Transform - Zero React Re-renders!)
@@ -524,14 +600,13 @@ export default function TestimonialGlobe({
 
         projectedCoords.push({ x: screenX, y: screenY, depth: normalizedDepth });
 
-        // Direct DOM update (blistering fast 60/120 FPS)
+        // Direct DOM update (blistering fast 60/120 FPS, pointer-events always available!)
         const el = cardElementsRef.current[i];
         if (el) {
           el.style.transform = `translate3d(${screenX - 150}px, ${screenY - 110}px, 0) scale(${cardScale})`;
           el.style.opacity = `${opacity}`;
           el.style.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : "none";
           el.style.zIndex = `${zIndex}`;
-          el.style.pointerEvents = isDraggingRef.current ? "none" : "auto";
         }
       }
 
@@ -639,9 +714,9 @@ export default function TestimonialGlobe({
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        cursor: isDraggingRef.current ? "grabbing" : "grab",
+        cursor: "grab",
         userSelect: "none",
-        touchAction: "none",
+        touchAction: "pan-y",
         direction: "rtl",
         ...style,
       }}
@@ -722,8 +797,6 @@ export default function TestimonialGlobe({
         }}
       >
         {cardList.map((card, idx) => {
-          const cardHue = colorMode === "Dual" ? (idx % 2 === 0 ? hue : secondHue) : hue;
-
           return (
             <div
               key={card.id}
@@ -731,7 +804,9 @@ export default function TestimonialGlobe({
                 cardElementsRef.current[idx] = el;
               }}
               onClick={(e) => {
-                e.stopPropagation();
+                if (isDraggingRef.current) return;
+                const target = e.target as HTMLElement;
+                if (target.closest("a, button, input")) return;
                 bringCardToFront(idx);
               }}
               style={{
@@ -743,18 +818,19 @@ export default function TestimonialGlobe({
                 pointerEvents: "auto",
                 cursor: "pointer",
                 willChange: "transform, opacity, filter",
+                touchAction: "manipulation",
               }}
             >
               <div
                 style={{
-                  backgroundColor: "rgba(11, 15, 26, 0.88)",
-                  backdropFilter: "blur(16px)",
-                  WebkitBackdropFilter: "blur(16px)",
+                  backgroundColor: "rgba(11, 15, 26, 0.92)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
                   border: `1.5px solid ${card.accentColor}55`,
                   borderRadius: "20px",
                   padding: "20px 22px",
                   color: "#ffffff",
-                  boxShadow: `0 15px 35px rgba(0,0,0,0.6), 0 0 20px ${card.accentColor}15`,
+                  boxShadow: `0 15px 35px rgba(0,0,0,0.65), 0 0 20px ${card.accentColor}15`,
                   position: "relative",
                   overflow: "hidden",
                   transition: "border-color 0.3s ease, box-shadow 0.3s ease",
@@ -839,14 +915,16 @@ export default function TestimonialGlobe({
                 {/* Value Pill + Copy Button */}
                 <div
                   style={{
-                    backgroundColor: "rgba(0, 0, 0, 0.45)",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
                     borderRadius: "10px",
                     padding: "7px 12px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginBottom: "12px",
+                    position: "relative",
+                    zIndex: 10,
                   }}
                 >
                   <span
@@ -859,7 +937,8 @@ export default function TestimonialGlobe({
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
-                      maxWidth: "190px",
+                      maxWidth: "185px",
+                      userSelect: "all",
                     }}
                   >
                     {card.value}
@@ -868,20 +947,24 @@ export default function TestimonialGlobe({
                   <button
                     type="button"
                     onClick={(e) => handleCopy(e, card.id, card.copyValue)}
-                    title="کپی کردن"
+                    title="کپی در حافظه"
                     style={{
-                      background: copiedId === card.id ? "rgba(34, 197, 94, 0.25)" : "rgba(255, 255, 255, 0.08)",
-                      border: `1px solid ${copiedId === card.id ? "#22c55e" : "rgba(255, 255, 255, 0.15)"}`,
+                      background: copiedId === card.id ? "rgba(34, 197, 94, 0.35)" : "rgba(255, 255, 255, 0.12)",
+                      border: `1px solid ${copiedId === card.id ? "#22c55e" : "rgba(255, 255, 255, 0.2)"}`,
                       borderRadius: "6px",
-                      padding: "4px 8px",
+                      padding: "5px 10px",
                       fontSize: "11px",
-                      color: copiedId === card.id ? "#4ade80" : "#94a3b8",
+                      fontWeight: 600,
+                      color: copiedId === card.id ? "#4ade80" : "#ffffff",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       gap: "4px",
                       transition: "all 0.2s ease",
                       fontFamily: "'Dana', sans-serif",
+                      pointerEvents: "auto",
+                      position: "relative",
+                      zIndex: 20,
                     }}
                   >
                     {copiedId === card.id ? (
@@ -922,40 +1005,44 @@ export default function TestimonialGlobe({
                   href={card.link}
                   target={card.link.startsWith("http") ? "_blank" : undefined}
                   rel={card.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => handleActionClick(e, card.link)}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
                     width: "100%",
-                    padding: "9px 16px",
+                    padding: "10px 16px",
                     borderRadius: "10px",
-                    background: `linear-gradient(135deg, ${card.accentColor}25, ${card.accentColor}50)`,
-                    border: `1px solid ${card.accentColor}77`,
+                    background: `linear-gradient(135deg, ${card.accentColor}30, ${card.accentColor}60)`,
+                    border: `1px solid ${card.accentColor}`,
                     color: "#ffffff",
-                    fontSize: "12.5px",
+                    fontSize: "13px",
                     fontWeight: 700,
                     textDecoration: "none",
-                    boxShadow: `0 4px 15px ${card.accentColor}22`,
+                    boxShadow: `0 4px 15px ${card.accentColor}25`,
                     transition: "all 0.25s ease",
                     fontFamily: "'Dana', sans-serif",
+                    cursor: "pointer",
+                    pointerEvents: "auto",
+                    position: "relative",
+                    zIndex: 20,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}45, ${card.accentColor}85)`;
-                    e.currentTarget.style.boxShadow = `0 6px 20px ${card.accentColor}45`;
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}50, ${card.accentColor}90)`;
+                    e.currentTarget.style.boxShadow = `0 6px 20px ${card.accentColor}50`;
                     e.currentTarget.style.transform = "translateY(-1px)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}25, ${card.accentColor}50)`;
-                    e.currentTarget.style.boxShadow = `0 4px 15px ${card.accentColor}22`;
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${card.accentColor}30, ${card.accentColor}60)`;
+                    e.currentTarget.style.boxShadow = `0 4px 15px ${card.accentColor}25`;
                     e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
                   <span>{card.actionText}</span>
                   <svg
-                    width="13"
-                    height="13"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
