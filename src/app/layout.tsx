@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AmbientParticleNetwork from "@/components/AmbientParticleNetwork";
 
 export const metadata: Metadata = {
   title: "تامال سن - مهندس نرم‌افزار، توسعه‌دهنده فرانت‌اند و اپلیکیشن",
@@ -99,7 +100,10 @@ export default function RootLayout({
         dir="rtl"
         suppressHydrationWarning
       >
-        {children}
+        <AmbientParticleNetwork showControls={true} />
+        <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
+          {children}
+        </div>
       </body>
     </html>
   );

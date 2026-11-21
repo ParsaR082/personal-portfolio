@@ -1,5 +1,5 @@
-html, body {
-  background-color: #1a191d !important;
+html {
+  background-color: #08090e !important;
   color: #fff;
   width: 100% !important;
   min-width: 100% !important;
@@ -8,11 +8,33 @@ html, body {
   padding: 0 !important;
 }
 
-#page.site, .site-content {
-  background-color: #1a191d !important;
+body {
+  background-color: transparent !important;
+  color: #fff;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#page.site, .site-content, .page-container, .elementor-section {
+  background-color: transparent !important;
   width: 100% !important;
   max-width: 100% !important;
   min-width: 100% !important;
+}
+
+/* Replace hero static background with global ambient particle canvas */
+.elementor-element.elementor-element-4f4e48d,
+.elementor-element.elementor-element-4f4e48d:not(.elementor-motion-effects-element-type-background),
+.elementor-element.elementor-element-4f4e48d > .elementor-motion-effects-container > .elementor-motion-effects-layer {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.elementor-element.elementor-element-4f4e48d > .elementor-background-overlay {
+  display: none !important;
 }
 
 /* Tryotel Phone Mockup Video Styling */
