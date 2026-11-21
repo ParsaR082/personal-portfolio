@@ -375,7 +375,8 @@ max-width: 1120px;
    RTL PERSIAN (فارسی) ENHANCEMENTS & BUG FIXES
    ========================================================= */
 
-/* 1. Global Font and Typography - Estedad Variable */
+/* 1. Global Font and Typography - Dana / IRANYekanX / Estedad */
+@import url('/fonts/fonts.css');
 @import url('/assets/fonts/estedad/index.css');
 
 html[dir="rtl"],
@@ -394,7 +395,7 @@ body.rtl p,
 body.rtl a,
 body.rtl span,
 body.rtl div {
-  font-family: 'Estedad Variable', 'Estedad', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 body.rtl code,
@@ -403,7 +404,7 @@ body.rtl .font-mono,
 body.rtl #primary-menu,
 body.rtl #primary-menu span,
 body.rtl #mobile-menu span {
-  font-family: 'Estedad Variable', 'Estedad', 'Roboto mono', monospace !important;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', 'Roboto mono', monospace !important;
   letter-spacing: 0px !important;
 }
 
@@ -503,11 +504,24 @@ body.rtl #mobile-menu li {
   height: 60px !important;
   margin: 0 auto !important;
   display: block !important;
+  overflow: hidden !important;
 }
 
 .elementor-element.elementor-element-82668a7 .e-lottie__animation {
   width: 100% !important;
   height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Ensure only exactly 1 SVG is shown, hiding any duplicate instances */
+.elementor-element.elementor-element-82668a7 .e-lottie__animation > svg:not(:first-child) {
+  display: none !important;
+}
+
+.elementor-element.elementor-element-82668a7 .e-lottie__animation > svg:first-child {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
 }
 
 /* =========================================================
@@ -534,7 +548,7 @@ body.rtl .icon-box.with-left-icon:not(.with-full-icon) .icon-box-icon {
 }
 
 body.rtl .icon-box-title {
-  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', sans-serif !important;
   font-weight: 700 !important;
 }
 
@@ -589,7 +603,7 @@ body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title
   text-align: right !important;
   font-size: 13.5px !important;
   line-height: 1.85 !important;
-  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', sans-serif !important;
   color: #cfd3dc !important;
   direction: rtl !important;
 }
@@ -619,16 +633,39 @@ body.rtl .code-editor-style .elementor-widget-container .elementor-heading-title
 }
 
 /* =========================================================
-   PROBLEM 4 FIX: Work Section Tryotel Featured Project Layout
+   PROBLEM 4 FIX: Work Section Tryotel Featured Project Layout (Mirrored RTL)
    ========================================================= */
 body.rtl .elementor-element-a1b9b56 {
   position: relative !important;
 }
 
-/* Flip purple arrow horizontally to point to the phone on the left */
+body.rtl .elementor-element-a1b9b56 > .elementor-widget-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important; /* In RTL, flex-start is the right side */
+  text-align: right !important;
+  position: relative !important;
+}
+
+/* Arrow: right-aligned, flipped horizontally to point up and left towards the phone */
 body.rtl .elementor-element-d654387 {
   text-align: right !important;
+  direction: rtl !important;
+  transform: none !important;
+  width: 100% !important;
+  margin-bottom: 20px !important;
+}
+
+body.rtl .elementor-element-d654387 .elementor-widget-container {
+  margin: 0 !important;
+  text-align: right !important;
+}
+
+body.rtl .elementor-element-d654387 img {
+  display: inline-block !important;
+  width: 124px !important;
   transform: scaleX(-1) !important;
+  transform-origin: center center !important;
   margin-right: 60px !important;
   margin-left: 0 !important;
 }
@@ -637,34 +674,72 @@ body.rtl .elementor-element-d38e305,
 body.rtl .elementor-element-d38e305 .elementor-heading-title {
   text-align: right !important;
   direction: rtl !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
 body.rtl .elementor-element-5df8de9,
 body.rtl .elementor-element-5df8de9 .elementor-heading-title {
   text-align: right !important;
   direction: rtl !important;
-  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', sans-serif !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
-body.rtl .elementor-element-93f6e71 {
+body.rtl .elementor-element-93f6e71,
+body.rtl .elementor-element-93f6e71.elementor-align-left,
+body.rtl .elementor-element-93f6e71.elementor-align-right {
   text-align: right !important;
+  direction: rtl !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
 body.rtl .elementor-element-93f6e71 .elementor-button-wrapper {
   text-align: right !important;
 }
 
-/* Position phone mockup cleanly on the left */
+body.rtl .elementor-element-93f6e71 .elementor-button {
+  display: inline-block !important;
+}
+
+/* Position phone mockup cleanly on the far left */
 body.rtl .elementor-element-8dfc42c {
   right: auto !important;
-  left: -40px !important;
+  left: -240px !important;
   top: -62px !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
 }
 
 body.rtl .elementor-element-8dfc42c video {
   max-width: 100% !important;
   height: auto !important;
   object-fit: contain !important;
+  pointer-events: auto !important;
+}
+
+@media (max-width: 1024px) {
+  body.rtl .elementor-element-8dfc42c {
+    left: -160px !important;
+    top: -40px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body.rtl .elementor-element-8dfc42c {
+    position: relative !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    margin: 30px auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  body.rtl .elementor-element-d654387 img {
+    margin-right: 0 !important;
+  }
 }
 
 body.rtl .elementor-element-249bd7b {
@@ -698,7 +773,7 @@ body.rtl .elementor-widget-text-editor p {
 }
 
 body.rtl .testimonial-author {
-  font-family: 'Estedad Variable', 'Estedad', sans-serif !important;
+  font-family: 'Dana', 'IRANYekanX', 'Estedad Variable', 'Estedad', sans-serif !important;
   font-weight: 700 !important;
 }
 
@@ -725,10 +800,58 @@ body.rtl .accordionItem_control {
   right: auto !important;
 }
 
-/* Scroll-to-top Button in RTL */
+/* =========================================================
+   SCROLL TO TOP BUTTON (RTL Corner Floating Styling)
+   ========================================================= */
+body.rtl .elementor-element.elementor-element-0acfce8,
+body.rtl .elementor-218120 .elementor-element.elementor-element-0acfce8,
 body.rtl .ha-scroll-to-top-button {
-  left: 15px !important;
+  left: 24px !important;
   right: auto !important;
+  bottom: 24px !important;
+  top: auto !important;
+  position: fixed !important;
+  z-index: 99999 !important;
+  width: auto !important;
+}
+
+body.rtl .elementor-element.elementor-element-0acfce8 > .elementor-widget-container,
+body.rtl .elementor-218120 .elementor-element.elementor-element-0acfce8 > .elementor-widget-container {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.rtl .elementor-element.elementor-element-0acfce8 .elementor-icon,
+body.rtl .elementor-218120 .elementor-element.elementor-element-0acfce8 .elementor-icon {
+  background-color: #ffffff !important;
+  color: #9b37ff !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+body.rtl .elementor-element.elementor-element-0acfce8 .elementor-icon:hover,
+body.rtl .elementor-218120 .elementor-element.elementor-element-0acfce8 .elementor-icon:hover {
+  background-color: #9b37ff !important;
+  color: #ffffff !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 25px rgba(155, 55, 255, 0.45) !important;
+}
+
+body.rtl .elementor-element.elementor-element-0acfce8 .elementor-icon i,
+body.rtl .elementor-element.elementor-element-0acfce8 .elementor-icon svg,
+body.rtl .elementor-218120 .elementor-element.elementor-element-0acfce8 .elementor-icon svg {
+  color: inherit !important;
+  fill: currentColor !important;
+  font-size: 18px !important;
 }
 
 /* Portfolio sorting filters in RTL */

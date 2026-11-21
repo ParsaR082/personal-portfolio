@@ -25,6 +25,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {/* Fonts */}
+        <link rel="stylesheet" href="/fonts/fonts.css" />
         <link rel="stylesheet" href="/assets/fonts/estedad/index.css" />
         <link rel="stylesheet" href="/assets/fonts/google-fonts.css" />
         <link rel="stylesheet" href="/assets/vendor/npm/aos@2.3.4/dist/aos.min.css" />
@@ -63,9 +64,22 @@ export default function RootLayout({
                   }
                 });
 
-                function loadScrollLottie() {
+                // Cleanup duplicate Lottie SVGs if multiple are loaded
+                var lottieEl = document.querySelector(".e-lottie__animation");
+                if (lottieEl) {
+                  var obs = new MutationObserver(function() {
+                    var svgs = lottieEl.querySelectorAll("svg");
+                    if (svgs.length > 1) {
+                      for (var i = 1; i < svgs.length; i++) {
+                        svgs[i].remove();
+                      }
+                    }
+                  });
+                  obs.observe(lottieEl, { childList: true });
+                }
+                setTimeout(function() {
                   var container = document.querySelector(".e-lottie__animation");
-                  if (container && window.lottie && !container.hasChildNodes()) {
+                  if (container && window.lottie && !container.querySelector("svg")) {
                     window.lottie.loadAnimation({
                       container: container,
                       renderer: "svg",
@@ -74,9 +88,7 @@ export default function RootLayout({
                       path: "/wp-content/uploads/2021/07/lf30_editor_axlyflyi.json"
                     });
                   }
-                }
-                loadScrollLottie();
-                setTimeout(loadScrollLottie, 500);
+                }, 1000);
               });
             `,
           }}
