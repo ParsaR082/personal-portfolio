@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import AmbientParticleNetwork from "@/components/AmbientParticleNetwork";
 
 export const metadata: Metadata = {
-  title: "تامال سن - مهندس نرم‌افزار، توسعه‌دهنده فرانت‌اند و اپلیکیشن",
+  title: "NeoVoid - مهندس نرم‌افزار، توسعه‌دهنده فرانت‌اند و اپلیکیشن",
   description:
-    "مهندس نرم‌افزار متعهد به خلق تجربه‌های وب و موبایل با تمرکز بر React، Next.js و Flutter. تامال سن",
+    "مهندس نرم‌افزار متعهد به خلق تجربه‌های وب و موبایل با تمرکز بر React، Next.js و Flutter. NeoVoid",
   icons: {
     icon: [
       { url: "/wp-content/uploads/2021/11/cropped-favicon-32x32.png", sizes: "32x32" },

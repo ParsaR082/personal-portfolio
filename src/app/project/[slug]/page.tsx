@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const project = getProject(slug);
   return {
-    title: `${project.title} | تامال سن`,
+    title: `${project.title} | NeoVoid`,
     description: project.summary,
   };
 }

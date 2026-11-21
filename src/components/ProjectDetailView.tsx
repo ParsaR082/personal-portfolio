@@ -289,7 +289,7 @@ export default function ProjectDetailView({
               transition: "color 0.2s ease",
             }}
           >
-            TamalSen<span style={{ color: "#38bdf8" }}>._</span>
+            NeoVoid<span style={{ color: "#38bdf8" }}>._</span>
           </Link>
 
           {/* Live URL Link (if available) */}
@@ -936,3 +936,4 @@ export default function ProjectDetailView({
     </div>
   );
 }
+

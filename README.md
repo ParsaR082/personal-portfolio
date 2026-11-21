@@ -1,6 +1,6 @@
-# Personal Portfolio - Tamal Sen (Next.js Edition)
+# Personal Portfolio - NeoVoid (Next.js Edition)
 
-A high-performance clone of [tamalsen.dev](https://tamalsen.dev/) built with **Next.js 15**, **React 19**, and **TypeScript**.
+A high-performance portfolio website built with **Next.js 15**, **React 19**, and **TypeScript**.
 
 ## Features
 - **Next.js App Router**: Optimized routing for Homepage, Projects (`/project/[slug]`), and Categories (`/portfolio-category/[slug]`).
